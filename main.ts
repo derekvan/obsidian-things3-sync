@@ -10,7 +10,8 @@ interface TodoInfo {
 	title: string,
 	tags: string,
 	date: string,
-	project: string
+	project: string,
+	notes: string
 }
 
 interface PluginSettings {
@@ -78,7 +79,8 @@ function contructTodo(line: string, settings: PluginSettings, fileName: string){
 		title: extractTitle(line),
 		tags: tags,
 		date: extractDate(fileName),
-		project: extractProject()
+		project: extractProject(),
+		notes: extractNotes(line)
 	}
 
 	return todo;
@@ -134,6 +136,31 @@ function extractTags(line: string, setting_tags: string){
 	return tags;
 }
 
+function extractNotes(line: string){
+	let content = line
+	content = content.replace(/^- /,"");
+	const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+	const doc = view.getViewData();
+	const tasks = doc.split("\n- ");
+	const lines = tasks.find(a => a.includes(content))
+	const notesArray = lines.split('\n')
+	notesArray.shift();
+ 
+
+	function filterItems(arr: Array<string>, query: string) {
+
+		return arr.filter(function(el:string) {
+		return el.toLowerCase().indexOf(query.toLowerCase()) !== -1
+		})
+	}
+	const a = filterItems(notesArray,"\t- ");
+	const subTasks = a.join('\n');
+	
+	const notes = subTasks
+
+	return notes
+}
+
 function extractTarget(line: string) {
 	const regexId = /id=(\w+)/
 	const id = line.match(regexId);
@@ -157,7 +184,9 @@ function extractTarget(line: string) {
 }
 
 function createTodo(todo: TodoInfo, deepLink: string){
-	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${deepLink}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
+	const noter = todo.notes + "\n\n" + deepLink
+	const n = urlEncode(noter)
+	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
 	window.open(url);
 }
 
@@ -222,10 +251,10 @@ export default class Things3Plugin extends Plugin {
 					let fileName = urlEncode(fileTitle.name)
 					fileName = fileName.replace(/\.md$/, '')
 					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
-					const encodedLink = urlEncode(obsidianDeepLink)
+					//const encodedLink = urlEncode(obsidianDeepLink)
 					const line = getCurrentLine(editor, view)
 					const todo = contructTodo(line, this.settings, fileName)
-					createTodo(todo, encodedLink)
+					createTodo(todo, obsidianDeepLink)
 				}
 			}
 		});
