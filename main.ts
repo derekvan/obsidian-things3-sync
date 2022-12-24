@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, EditorPosition, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, Editor, MarkdownView, EditorPosition, Platform, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
 
 function getCurrentLine(editor: Editor, view: MarkdownView) {
 	const lineNumber = editor.getCursor().line
@@ -103,8 +103,10 @@ function createTodo(todo: TodoInfo, deepLink: string){
 	window.open(url);
 }
 
-function updateTodo(todoId: string, completed: string, authToken: string){
-	const url = `things:///update?id=${todoId}&completed=${completed}&auth-token=${authToken}`;
+function updateTodo(todoId: string, completed: string, authToken: string, fileName: string, platform: string){
+	const url = `shortcuts://run-shortcut?name=${platform}&input=text&text={"filename":"${fileName}","id":"${todoId}","completed":"${completed}"}`
+  	console.log(url)
+	//const url = `things:///update?id=${todoId}&completed=${completed}&auth-token=${authToken}`;
 	window.open(url);
 }
 
@@ -178,19 +180,55 @@ export default class Things3Plugin extends Plugin {
 				if (fileTitle == null) {
 					return;
 				} else {
-					const line = getCurrentLine(editor, view)
-					const target = extractTarget(line)
-					if (target.todoId == '') {
-						new Notice(`This is not a things3 todo`);
-					} else {
-						view.app.commands.executeCommandById("editor:toggle-checklist-status")
-						updateTodo(target.todoId, target.afterStatus, this.settings.authToken)
-						new Notice(`${target.todoId} set completed:${target.afterStatus} on things3`);
-					}
+					let fileName = urlEncode(fileTitle.path);
+          console.log(fileName)
+          fileName = fileName.replace(/\.md$/, "");
+          const line = getCurrentLine(editor, view);
+          const target = extractTarget(line);
+          if (target.todoId == "") {
+            new Notice(`This is not a things3 todo`);
+          } else {
+            //view.app.commands.executeCommandById("editor:toggle-checklist-status");
+            var platform
+            if (Platform.isMobile){
+              platform = "ThingsObsidianMobile"
+            }
+            else {
+              platform = "ThingsObsidianDesktop"
+            }
+            updateTodo(target.todoId, target.afterStatus, this.settings.authToken, fileName, platform);
+            //new import_obsidian.Notice(`${target.todoId} set completed:${target.afterStatus} on things3`);
 					
 				}
 			}
+			}
 		});
+
+		this.addCommand({
+      id: "mark-things-complete",
+      name: "Mark Things Todo Complete",
+      editorCallback: (editor, view) => {
+        const workspace = this.app.workspace;
+        const fileTitle = workspace.getActiveFile();
+        if (fileTitle == null) {
+          return;
+        } else {
+          let fileName = urlEncode(fileTitle.path);
+          console.log(fileName)
+          fileName = fileName.replace(/\.md$/, "");
+          const line = getCurrentLine(editor, view);
+          const target = extractTarget(line);
+          if (target.todoId == "") {
+            new Notice(`This is not a things3 todo`);
+          } else {
+            view.app.commands.executeCommandById("editor:toggle-checklist-status");
+            const url = `things:///update?id=${target.todoId}&completed=true&auth-token=${this.settings.authToken}`;
+            window.open(url);
+            //new import_obsidian.Notice(`${target.todoId} set completed:${target.afterStatus} on things3`);
+          }
+        }
+      }
+    });
 	}
 
 	onunload() {
