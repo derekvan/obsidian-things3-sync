@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, EditorPosition, Platform, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, Editor, MarkdownView, EditorPosition, FrontMatterCache, Platform, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
 
 function getCurrentLine(editor: Editor, view: MarkdownView) {
 	const lineNumber = editor.getCursor().line
@@ -9,7 +9,8 @@ function getCurrentLine(editor: Editor, view: MarkdownView) {
 interface TodoInfo {
 	title: string,
 	tags: string,
-	date: string
+	date: string,
+	project: string
 }
 
 interface PluginSettings {
@@ -21,6 +22,46 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	authToken: '',
 	defaultTags: ''
 }
+
+export class FrontMatterParser {
+	static getAliases(frontMatter: FrontMatterCache): string[] {
+	  let proj: string[] = [];
+  
+	  if (frontMatter) {
+		proj = FrontMatterParser.getValueForKey(frontMatter, /^project?$/i);
+	  }
+  
+	  return proj;
+	}
+  
+	private static getValueForKey(
+	  frontMatter: FrontMatterCache,
+	  keyPattern: RegExp,
+	): string[] {
+	  const retVal: string[] = [];
+	  const fmKeys = Object.keys(frontMatter);
+	  const key = fmKeys.find((val) => keyPattern.test(val));
+  
+	  if (key) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		let value = frontMatter[key];
+  
+		if (typeof value === 'string') {
+		  value = value.split(',');
+		}
+  
+		if (Array.isArray(value)) {
+		  value.forEach((val) => {
+			if (typeof val === 'string') {
+			  retVal.push(val.trim());
+			}
+		  });
+		}
+	  }
+  
+	  return retVal;
+	}
+  }
 
 function urlEncode(line: string) {
 	line = encodeURIComponent(line)
@@ -36,10 +77,27 @@ function contructTodo(line: string, settings: PluginSettings, fileName: string){
 	const todo: TodoInfo = {
 		title: extractTitle(line),
 		tags: tags,
-		date: extractDate(fileName)
+		date: extractDate(fileName),
+		project: extractProject()
 	}
 
 	return todo;
+}
+
+function extractProject(){
+	const { metadataCache } = this.app;
+	const workspace = this.app.workspace;
+	const fileTitle = workspace.getActiveFile()
+    const frontMatter = metadataCache.getFileCache(fileTitle)?.frontmatter;
+	var proj;
+    if (frontMatter) {
+      const projs = FrontMatterParser.getAliases(frontMatter);
+      let i = projs.length;
+	  while (i--) {
+         proj = projs[i];
+	  }
+	}
+	return proj;
 }
 
 function extractDate(line:string) {
@@ -99,7 +157,7 @@ function extractTarget(line: string) {
 }
 
 function createTodo(todo: TodoInfo, deepLink: string){
-	const url = `things:///add?title=${todo.title}&notes=${deepLink}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
+	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${deepLink}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
 	window.open(url);
 }
 
