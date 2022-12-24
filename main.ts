@@ -186,7 +186,7 @@ export default class Things3Plugin extends Plugin {
 			} else {
 				const editor = view.editor
 				const currentLine = getCurrentLine(editor, view)
-				const firstLetterIndex = currentLine.search(/[^\s#\-\[\]*]/);
+				const firstLetterIndex = currentLine.search(/[^\s#\[\]*]/);
 				const line = currentLine.substring(firstLetterIndex, currentLine.length)
 				const editorPosition = view.editor.getCursor()
 				const lineLength = view.editor.getLine(editorPosition.line).length
@@ -198,11 +198,13 @@ export default class Things3Plugin extends Plugin {
 					line: editorPosition.line,
 					ch: lineLength
 				}
-
+				
 				if (firstLetterIndex > 0) {
 					view.editor.replaceRange(`[${line}](things:///show?id=${todoID})`, startRange, endRange);
 				} else {
-					view.editor.replaceRange(`- [ ] [${line}](things:///show?id=${todoID})`, startRange, endRange);
+					console.log(line)
+					const newLine = line.replace(/^- /,"").replace(/^\[ \] /,"");
+					view.editor.replaceRange(`- [ ] [${newLine}](things:///show?id=${todoID})`, startRange, endRange);
 				}
 			}
 		});
