@@ -91,13 +91,13 @@ function extractProject(){
 	const workspace = this.app.workspace;
 	const fileTitle = workspace.getActiveFile()
     const frontMatter = metadataCache.getFileCache(fileTitle)?.frontmatter;
-	var proj;
+	let proj;
     if (frontMatter) {
       const projs = FrontMatterParser.getAliases(frontMatter);
       let i = projs.length;
-	  while (i--) {
+		while (i--) {
          proj = projs[i];
-	  }
+		}
 	}
 	return proj;
 }
@@ -229,11 +229,11 @@ export default class Things3Plugin extends Plugin {
 				}
 				
 				if (firstLetterIndex > 0) {
-					view.editor.replaceRange(`[${line}](things:///show?id=${todoID})`, startRange, endRange);
+					view.editor.replaceRange(`${line} [things](things:///show?id=${todoID})`, startRange, endRange);
 				} else {
 					console.log(line)
 					const newLine = line.replace(/^- /,"").replace(/^\[ \] /,"");
-					view.editor.replaceRange(`- [ ] [${newLine}](things:///show?id=${todoID})`, startRange, endRange);
+					view.editor.replaceRange(`- [ ] ${newLine} [things](things:///show?id=${todoID})`, startRange, endRange);
 				}
 			}
 		});
