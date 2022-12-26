@@ -26,41 +26,41 @@ const DEFAULT_SETTINGS: PluginSettings = {
 
 export class FrontMatterParser {
 	static getAliases(frontMatter: FrontMatterCache): string[] {
-	  let proj: string[] = [];
+	let proj: string[] = [];
   
-	  if (frontMatter) {
+	if (frontMatter) {
 		proj = FrontMatterParser.getValueForKey(frontMatter, /^project?$/i);
-	  }
+	}
   
-	  return proj;
+	return proj;
 	}
   
 	private static getValueForKey(
-	  frontMatter: FrontMatterCache,
-	  keyPattern: RegExp,
+	frontMatter: FrontMatterCache,
+	keyPattern: RegExp,
 	): string[] {
-	  const retVal: string[] = [];
-	  const fmKeys = Object.keys(frontMatter);
-	  const key = fmKeys.find((val) => keyPattern.test(val));
+	const retVal: string[] = [];
+	const fmKeys = Object.keys(frontMatter);
+	const key = fmKeys.find((val) => keyPattern.test(val));
   
-	  if (key) {
+	if (key) {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		let value = frontMatter[key];
   
 		if (typeof value === 'string') {
-		  value = value.split(',');
+			value = value.split(',');
 		}
   
 		if (Array.isArray(value)) {
-		  value.forEach((val) => {
+			value.forEach((val) => {
 			if (typeof val === 'string') {
-			  retVal.push(val.trim());
+				retVal.push(val.trim());
 			}
-		  });
+		});
 		}
-	  }
+	}
   
-	  return retVal;
+	return retVal;
 	}
   }
 
