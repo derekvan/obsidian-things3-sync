@@ -284,7 +284,7 @@ export default class Things3Plugin extends Plugin {
 		// Toggle task status and sync to things
 		this.addCommand({
 			id: 'toggle-things-todo',
-			name: 'Toggle Things Todo',
+			name: 'Toggle Single Things Todo',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const workspace = this.app.workspace;
 				const fileTitle = workspace.getActiveFile()
@@ -309,7 +309,7 @@ export default class Things3Plugin extends Plugin {
 			}
 		});
 
-
+		// Mark task complete in Obsidian and Things at once
 		this.addCommand({
       id: "mark-things-complete",
       name: "Mark Things Todo Complete",
@@ -336,9 +336,10 @@ export default class Things3Plugin extends Plugin {
       }
     });
 
+	// Update all tasks in the # Now header
 	this.addCommand({
-		id: "update-test",
-		name: "Testing new update approach",
+		id: "things-bulk-update",
+		name: "Update all things in # Now header",
 		editorCallback: (editor, view) => {
 			const workspace = this.app.workspace;
 				const fileTitle = workspace.getActiveFile()
