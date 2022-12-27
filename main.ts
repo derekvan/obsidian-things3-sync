@@ -161,6 +161,23 @@ function extractNotes(line: string){
 	return notes
 }
 
+function collectTodos(){
+	const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+	const doc = view.getViewData();
+	const re = /(?<=^# Now\n(?:(?!\n# \w)[^])*)-[ \t]*\[[^][]*].*(?:\n[ \t]+-.*)*/gm
+	const things = doc.match(re)
+	const thingTasks = things
+	const tArray = {"things":[]};
+	thingTasks.forEach(t => {
+		const target = extractTarget(t)
+		const re2 = /- \[(?: |x)\] (.*?) \[things\]\(things:\/\/\/show\?id=.*?\)/
+		const name = t.match(re2)
+		tArray.things.push({"task":name[1],"id":target.todoId,"status":target.afterStatus})
+	});
+	
+	return tArray
+}
+
 function extractTarget(line: string) {
 	const regexId = /id=(\w+)/
 	const id = line.match(regexId);
@@ -318,6 +335,17 @@ export default class Things3Plugin extends Plugin {
         }
       }
     });
+
+	this.addCommand({
+		id: "update-test",
+		name: "Testing new update approach",
+		editorCallback: (editor, view) => {
+		const todos = collectTodos();
+		console.log(todos)
+		const url = `shortcuts://run-shortcut?name=ThingsBulkUpdate&input=text&text=${todos}`
+		window.open(url);
+		}
+	});
 	}
 
 	onunload() {
