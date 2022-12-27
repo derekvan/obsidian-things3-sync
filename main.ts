@@ -192,7 +192,7 @@ function createTodo(todo: TodoInfo, deepLink: string){
 
 function updateTodo(todoId: string, completed: string, authToken: string, fileName: string, platform: string){
 	const url = `shortcuts://run-shortcut?name=${platform}&input=text&text={"filename":"${fileName}","id":"${todoId}","completed":"${completed}"}`
-  	console.log(url)
+	console.log(url)
 	//const url = `things:///update?id=${todoId}&completed=${completed}&auth-token=${authToken}`;
 	window.open(url);
 }
