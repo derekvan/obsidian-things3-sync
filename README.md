@@ -7,6 +7,17 @@ A Plugin for syncing between Obsidian and Things3. Supporting with Multi Languag
 * Support **Todo Tags**. You can just add tags after todo, or add default tags in setting.
 * Support **Capture Date**, if you the file has a Date in it, it will capture the date when create the todo.
 
+## Fork Features
+
+* Uses shortcuts to update multiple tasks at once
+* Uses shortcuts to update the status *from* things to Obsidian (i.e., tasks marked "complete" in Things will be marked complete in Obsidian)
+* Support **Project Metadata**, if your file has a value in the "project" YAML key, the things task will be created in that Things project.
+
+Fork requires Things 3.17 Beta and these specific shortcuts:
+
+* [Things Bulk Update](https://www.icloud.com/shortcuts/55142b7d0e5e4c3895bf4a65020427b3)
+* [Things Toggle Single](https://www.icloud.com/shortcuts/9839db1ce49f4d7ebea93fd5e4e85248)
+
 ## Usage
 
 ### Create Todo
@@ -16,27 +27,33 @@ A Plugin for syncing between Obsidian and Things3. Supporting with Multi Languag
 
 * Using `cmd + p` and run the `Things3 Sync: Create Todo`
 
-* ***Tags***: for now, the tags only support Things exsited tags. So add tag in Things3 first, and then use this plugin.
+* ***Tags***: for now, the tags only support existing Things tags. So add tag in Things3 first, and then use this plugin.
 
-### Toggle Todo
+### Toggle Single Things Todo
 
 * Select the line of todo
 
-* Using `cmd + P` and run the `Things3 Sync: Toggle Todo`
+* Using `cmd + P` and run the `Things3 Sync: Toggle Single Things Todo`
 
-* The Todo will be toggled both in Obsidian and Things3
+* If the todo is marked "complete" in either Things or Obsidian, it will be marked complete everywhere.
 
 ***Notes:*** If you wanna use the command conveniently, it would be better to set up a hotkeys for it.
 
-## Roadmap
+### Mark Things Todo Complete
 
-- [x] Multiple Markdown elements support.
+* Select the line of todo
 
-- [ ] Permanent URI support.
+* Using `cmd + P` and run the `Things3 Sync: Mark Things Todo Complete`
 
-- [x] Better tags support.
+* Todo will be marked complete in Obsidian and in Things
 
-- [ ] Better toggle trigger method.
+### Toggle all Tasks in # Now Header
+
+* Using `cmd + P` and run the `Things3 Sync: Update all Things in # Now Header`
+
+* If tasks are under the header `# Now`, they will be updated so that if the task is marked "complete" anywhere, it will be marked complete everywhere.
+
+
 
 ## Security
 
