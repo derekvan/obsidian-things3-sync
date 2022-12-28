@@ -170,8 +170,15 @@ function collectTodos(fileName: string){
 	const re = /(?<=^# Now\n(?:(?!\n# \w)[^])*)-[ \t]*\[[^][]*].*(?:\n[ \t]+-.*)*/gm
 	const things = doc.match(re)
 	const thingTasks = things
-	const tArray = {"things":[]};
-	thingTasks.forEach(t => {
+
+	return [thingTasks, block]
+}
+// try to separate out the collectTodos function from the update function, so that I can also use it in a new "create bulk todos" function
+
+function bulkUpdate(taskArray: Array<string>, block: Array<string>, fileName: string){
+		const tasks = taskArray
+		const tArray = {"things":[]}
+		tasks.forEach(t => {
 		const target = extractTarget(t)
 		const re2 = /- \[(?: |x)\] (.*?) \[things\]\(things:\/\/\/show\?id=.*?\)/
 		const name = t.match(re2)
@@ -281,6 +288,27 @@ export default class Things3Plugin extends Plugin {
 			}
 		});
 		
+		this.addCommand({
+			id: 'bulk-things-todo',
+			name: 'Bulk Create Things Todo',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				const workspace = this.app.workspace;
+				const fileTitle = workspace.getActiveFile()
+				if (fileTitle == null) {
+					return;
+				} else {
+					let fileName = urlEncode(fileTitle.name)
+					fileName = fileName.replace(/\.md$/, '')
+					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
+					//const encodedLink = urlEncode(obsidianDeepLink)
+					const todos = collectTodos(fileName)
+					const bulk = bulkUpdate(todos)
+
+				}
+			}
+		});
+
+
 		// Toggle task status and sync to things
 		this.addCommand({
 			id: 'toggle-things-todo',
@@ -350,7 +378,8 @@ export default class Things3Plugin extends Plugin {
 					
 					const fileName = fileTitle.path.replace(/\.md$/, "");
 					const todos = collectTodos(fileName);
-					const stringT = urlEncode(JSON.stringify(todos))
+					const bulk = bulkUpdate(todos[0], todos[1], fileName)
+					const stringT = urlEncode(JSON.stringify(bulk))
 
 					const url = `shortcuts://run-shortcut?name=ThingsBulkUpdate&input=text&text=${stringT}`
 					console.log(url)
