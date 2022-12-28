@@ -12,6 +12,11 @@ A Plugin for syncing between Obsidian and Things3. Supporting with Multi Languag
 * Uses shortcuts to update multiple tasks at once
 * Uses shortcuts to update the status *from* things to Obsidian (i.e., tasks marked "complete" in Things will be marked complete in Obsidian)
 * Support **Project Metadata**, if your file has a value in the "project" YAML key, the things task will be created in that Things project.
+* ***Notes***: Text entered as indented bullet list items will be sent as "notes". E.g.,
+
+- [ ] task item one
+    - notes item
+    - additional notes
 
 Fork requires Things 3.17 Beta and these specific shortcuts:
 
@@ -29,6 +34,20 @@ Fork requires Things 3.17 Beta and these specific shortcuts:
 
 * ***Tags***: for now, the tags only support existing Things tags. So add tag in Things3 first, and then use this plugin.
 
+### Bulk Create Things Todo
+
+* Using `cmd + P` and run the `Things3 Sync: Bulk Create Things Todo`
+
+* If tasks are under the header `# Now`, this command will check to see if they are already in Things. If not, it will create a new task in Things.
+
+### Mark Things Todo Complete
+
+* Select the line of todo
+
+* Using `cmd + P` and run the `Things3 Sync: Mark Things Todo Complete`
+
+* Todo will be marked complete in Obsidian and in Things
+
 ### Toggle Single Things Todo
 
 * Select the line of todo
@@ -38,14 +57,6 @@ Fork requires Things 3.17 Beta and these specific shortcuts:
 * If the todo is marked "complete" in either Things or Obsidian, it will be marked complete everywhere.
 
 ***Notes:*** If you wanna use the command conveniently, it would be better to set up a hotkeys for it.
-
-### Mark Things Todo Complete
-
-* Select the line of todo
-
-* Using `cmd + P` and run the `Things3 Sync: Mark Things Todo Complete`
-
-* Todo will be marked complete in Obsidian and in Things
 
 ### Toggle all Tasks in # Now Header
 

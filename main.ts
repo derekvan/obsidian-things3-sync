@@ -1,4 +1,6 @@
-import { App, Editor, MarkdownView, EditorPosition, FrontMatterCache, Platform, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, Editor, MarkdownView, EditorPosition, FrontMatterCache, Plugin, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { stringify } from 'querystring';
+import { urlToHttpOptions } from 'url';
 
 function getCurrentLine(editor: Editor, view: MarkdownView) {
 	const lineNumber = editor.getCursor().line
@@ -69,7 +71,7 @@ function urlEncode(line: string) {
 	return line
 }
 
-function contructTodo(line: string, settings: PluginSettings, fileName: string){
+function constructTodo(line: string, settings: PluginSettings, fileName: string){
 	line = line.trim();
 	const tags = extractTags(line, settings.defaultTags);
 
@@ -117,7 +119,7 @@ function extractTitle(line: string) {
 	const content = line.match(regex);
 	let title = '';
 	if (content != null) {
-		title = content[0]
+		title = content[0].split('\n')[0];
 	}
 	
 	return title;
@@ -161,12 +163,11 @@ function extractNotes(line: string){
 	return notes
 }
 
-function collectTodos(fileName: string){
+function collectTodos(){
 	const view = this.app.workspace.getActiveViewOfType(MarkdownView)
 	const doc = view.getViewData();
 	const now = /^# Now\n((.|\n)*?)(?=\n#+)/gm
 	const block = doc.match(now)
-	console.log(block)
 	const re = /(?<=^# Now\n(?:(?!\n# \w)[^])*)-[ \t]*\[[^][]*].*(?:\n[ \t]+-.*)*/gm
 	const things = doc.match(re)
 	const thingTasks = things
@@ -221,7 +222,6 @@ function createTodo(todo: TodoInfo, deepLink: string){
 
 function updateTodo(todoId: string, completed: string, authToken: string, fileName: string){
 	const url = `shortcuts://run-shortcut?name=ThingsToggleSingle&input=text&text={"filename":"${fileName}","id":"${todoId}","completed":"${completed}"}`
-	console.log(url)
 	//const url = `things:///update?id=${todoId}&completed=${completed}&auth-token=${authToken}`;
 	window.open(url);
 }
@@ -260,11 +260,37 @@ export default class Things3Plugin extends Plugin {
 				if (firstLetterIndex > 0) {
 					view.editor.replaceRange(`${line} [things](things:///show?id=${todoID})`, startRange, endRange);
 				} else {
-					console.log(line)
 					const newLine = line.replace(/^- /,"").replace(/^\[ \] /,"");
 					view.editor.replaceRange(`- [ ] ${newLine} [things](things:///show?id=${todoID})`, startRange, endRange);
 				}
 			}
+		});
+
+		// Register protocol for JSON return
+
+		this.registerObsidianProtocolHandler("things-sync-ids", async (ids) => {
+			const success = ids['x-things-ids']
+			const sArray = JSON.parse(success)
+			const bulk = collectTodos()
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+			const doc = view.getViewData();
+			const block = bulk[1].toString()
+			const newSplit = block.split((/\r?\n/))
+			let newArray = []
+			let x = 0
+			newSplit.forEach(s => {
+				const firstLetterIndex = s.search(/^- \[ \]/)
+				if (firstLetterIndex === 0){
+					if (!s.includes("[things](things:///show?id=")){
+						s = `${s} [things](things:///show?id=${sArray[x]})`
+						x++
+					}
+				}
+				newArray.push(s)
+			});
+			const newBlock = newArray.join("\n")
+			const newText = doc.replace(block,newBlock)
+			view.setViewData(newText, false)
 		});
 	
 		// Create TODO Command
@@ -282,7 +308,7 @@ export default class Things3Plugin extends Plugin {
 					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
 					//const encodedLink = urlEncode(obsidianDeepLink)
 					const line = getCurrentLine(editor, view)
-					const todo = contructTodo(line, this.settings, fileName)
+					const todo = constructTodo(line, this.settings, fileName)
 					createTodo(todo, obsidianDeepLink)
 				}
 			}
@@ -301,9 +327,20 @@ export default class Things3Plugin extends Plugin {
 					fileName = fileName.replace(/\.md$/, '')
 					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
 					//const encodedLink = urlEncode(obsidianDeepLink)
-					const todos = collectTodos(fileName)
-					const bulk = bulkUpdate(todos)
-
+					const todos = collectTodos()
+					let tJson = []
+					todos[0].forEach(t => {
+						const regexId = /\[things\]\(things:/
+						const id = t.match(regexId)
+						if (id == null){
+							const todo = constructTodo(t,this.settings,fileName)
+							const noter = todo.notes + "\n\n" + obsidianDeepLink
+							tJson.push({"type":"to-do","attributes":{"title":todo.title, "tags":[todo.tags],"list":todo.project,"notes": noter}})
+							}
+					});
+					const json = urlEncode(JSON.stringify(tJson))
+					const url = `things:///json?data=${json}&x-success=obsidian://things-sync-ids`
+					window.open(url)
 				}
 			}
 		});
@@ -320,7 +357,6 @@ export default class Things3Plugin extends Plugin {
 					return;
 				} else {
 					let fileName = urlEncode(fileTitle.path);
-          console.log(fileName)
           fileName = fileName.replace(/\.md$/, "");
           const line = getCurrentLine(editor, view);
           const target = extractTarget(line);
@@ -348,7 +384,6 @@ export default class Things3Plugin extends Plugin {
           return;
         } else {
           let fileName = urlEncode(fileTitle.path);
-          console.log(fileName)
           fileName = fileName.replace(/\.md$/, "");
           const line = getCurrentLine(editor, view);
           const target = extractTarget(line);
@@ -382,7 +417,6 @@ export default class Things3Plugin extends Plugin {
 					const stringT = urlEncode(JSON.stringify(bulk))
 
 					const url = `shortcuts://run-shortcut?name=ThingsBulkUpdate&input=text&text=${stringT}`
-					console.log(url)
 					window.open(url);
 				}
 			}
