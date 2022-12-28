@@ -23,6 +23,8 @@ Fork requires Things 3.17 Beta and these specific shortcuts:
 * [Things Bulk Update](https://www.icloud.com/shortcuts/55142b7d0e5e4c3895bf4a65020427b3)
 * [Things Toggle Single](https://www.icloud.com/shortcuts/9839db1ce49f4d7ebea93fd5e4e85248)
 
+These shortcuts require your vault to be accessible by the Files app (my vault is in iCloud, I'm not sure if Shortcuts can access your vault in Files with Obsidian Sync). The shortcuts can be modified if you don't use iCloud. You'll need the [Actions URI](https://czottmann.github.io/obsidian-actions-uri/routes/note/#notesearch-string-and-replace) plugin and will need to URL encode the filename, before text, and after text, and send that to Obsidian via the Actions URI search string and replace URL scheme.
+
 ## Usage
 
 ### Create Todo
