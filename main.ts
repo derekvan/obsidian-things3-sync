@@ -75,10 +75,10 @@ function constructTodo(line: string, settings: PluginSettings, fileName: string)
 	line = line.trim();
 	const tags = extractTags(line, settings.defaultTags);
 
-	line = line.replace(/#([^\s]+)/gs, '');
+	const line2 = line.replace(/#([^\s]+)/gs, '');
 
 	const todo: TodoInfo = {
-		title: extractTitle(line),
+		title: extractTitle(line2),
 		tags: tags,
 		date: extractDate(fileName),
 		project: extractProject(),
