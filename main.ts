@@ -66,6 +66,46 @@ export class FrontMatterParser {
 	}
   }
 
+  export class FrontMatterContextParser {
+	static getAliases(frontMatter: FrontMatterCache): string[] {
+	let context: string[] = [];
+  
+	if (frontMatter) {
+		context = FrontMatterContextParser.getValueForKey2(frontMatter, /^context?$/i);
+	}
+  
+	return context;
+	}
+  
+	private static getValueForKey2(
+	frontMatter: FrontMatterCache,
+	keyPattern: RegExp,
+	): string[] {
+	const retVal: string[] = [];
+	const fmKeys = Object.keys(frontMatter);
+	const key = fmKeys.find((val) => keyPattern.test(val));
+  
+	if (key) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		let value = frontMatter[key];
+  
+		if (typeof value === 'string') {
+			value = value.split(',');
+		}
+  
+		if (Array.isArray(value)) {
+			value.forEach((val) => {
+			if (typeof val === 'string') {
+				retVal.push(val.trim());
+			}
+		});
+		}
+	}
+  
+	return retVal;
+	}
+  }
+
 function urlEncode(line: string) {
 	line = encodeURIComponent(line)
 	return line
@@ -129,8 +169,20 @@ function extractTags(line: string, setting_tags: string){
 	const regex = /#([^\s]+)/gs
 	const array = [...line.matchAll(regex)]
 	const tag_array = array.map(x => x[1])
-	if (setting_tags.length > 0) {
-		tag_array.push(setting_tags);
+	const { metadataCache } = this.app;
+	const workspace = this.app.workspace;
+	const fileTitle = workspace.getActiveFile()
+    const frontMatter = metadataCache.getFileCache(fileTitle)?.frontmatter;
+	let context;
+	if (frontMatter) {
+		const contexts = FrontMatterContextParser.getAliases(frontMatter);
+		let i = contexts.length;
+		while (i--) {
+			context = contexts[i];
+			}
+		}
+	if (context) {
+		tag_array.push(context);
 	}
 	line = line.replace(regex, '');
 	const tags = tag_array.join(',')
@@ -214,9 +266,9 @@ function extractTarget(line: string) {
 }
 
 function createTodo(todo: TodoInfo, deepLink: string){
-	const noter = todo.notes + "\n\n" + deepLink
+	const noter = todo.project + "\n\n" + todo.notes + "\n\n" + deepLink
 	const n = urlEncode(noter)
-	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
+	const url = `things:///add?title=${todo.title}&list=${todo.tags}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=week`;
 	window.open(url);
 }
 
@@ -334,8 +386,8 @@ export default class Things3Plugin extends Plugin {
 						const id = t.match(regexId)
 						if (id == null){
 							const todo = constructTodo(t,this.settings,fileName)
-							const noter = todo.notes + "\n\n" + obsidianDeepLink
-							tJson.push({"type":"to-do","attributes":{"title":todo.title, "tags":[todo.tags],"list":todo.project,"notes": noter}})
+							const noter = todo.project + "\n\n" + todo.notes + "\n\n" + obsidianDeepLink
+							tJson.push({"type":"to-do","attributes":{"title":todo.title, "tags":["week"],"list":todo.tags,"notes": noter}})
 							}
 					});
 					const json = urlEncode(JSON.stringify(tJson))
