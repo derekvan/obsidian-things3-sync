@@ -278,6 +278,11 @@ function updateTodo(todoId: string, completed: string, authToken: string, fileNa
 	window.open(url);
 }
 
+export function constructDeeplink(fileName: string, vaultName: string){
+	const url = `obsidian://open?vault=${vaultName}&file=${fileName}`;
+	return url;
+ }
+
 export default class Things3Plugin extends Plugin {
 	settings: PluginSettings;
 
@@ -351,13 +356,15 @@ export default class Things3Plugin extends Plugin {
 			name: 'Create Things Todo',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const workspace = this.app.workspace;
+				const vault = this.app.vault
 				const fileTitle = workspace.getActiveFile()
 				if (fileTitle == null) {
 					return;
 				} else {
 					let fileName = urlEncode(fileTitle.name)
 					fileName = fileName.replace(/\.md$/, '')
-					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
+					const vaultName = vault.getName();
+					const obsidianDeepLink = constructDeeplink(fileName,vaultName)
 					//const encodedLink = urlEncode(obsidianDeepLink)
 					const line = getCurrentLine(editor, view)
 					const todo = constructTodo(line, this.settings, fileName)
@@ -371,13 +378,15 @@ export default class Things3Plugin extends Plugin {
 			name: 'Bulk Create Things Todo',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const workspace = this.app.workspace;
+				const vault = this.app.vault
 				const fileTitle = workspace.getActiveFile()
 				if (fileTitle == null) {
 					return;
 				} else {
 					let fileName = urlEncode(fileTitle.name)
 					fileName = fileName.replace(/\.md$/, '')
-					const obsidianDeepLink = (this.app as any).getObsidianUrl(fileTitle)
+					const vaultName = vault.getName();
+					const obsidianDeepLink = constructDeeplink(fileName,vaultName)
 					//const encodedLink = urlEncode(obsidianDeepLink)
 					const todos = collectTodos()
 					let tJson = []
