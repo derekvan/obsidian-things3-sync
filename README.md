@@ -1,5 +1,6 @@
 # Obsidian Things3 Sync Fork
-A Plugin for syncing between Obsidian and Things3. Supporting with Multi Language, Tags and Date, Cross-Platform. 
+A Plugin for syncing between Obsidian and Things3. This fork adds bulk creation and update options. [Original plugin](https://github.com/royxue/obsidian-things3-sync)
+
 ## Features
 
 * Support Mac OS and iOS.
