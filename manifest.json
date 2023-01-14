@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-things3-sync",
-	"name": "Obsidian Things3 Sync",
-	"version": "1.0.3",
+	"id": "obsidian-things3-sync-fork",
+	"name": "Obsidian Things3 Sync Fork",
+	"version": "2.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A plugin for sync between Obsidian and Things3, create Todo and sync Todo status",
-	"author": "Royx",
-	"authorUrl": "royxue.me",
+	"description": "A plugin for syncing tasks between Obsidian and Things3. Bulk adding and updating tasks based on status in Things or Obsidian",
+	"author": "derekvan",
+	"authorUrl": "https://memoryfailure.net",
 	"isDesktopOnly": false
 }
