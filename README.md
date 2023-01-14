@@ -1,4 +1,4 @@
-# Obsidian Things3 Sync
+# Obsidian Things3 Sync Fork
 A Plugin for syncing between Obsidian and Things3. Supporting with Multi Language, Tags and Date, Cross-Platform. 
 ## Features
 
@@ -40,7 +40,7 @@ These shortcuts require your vault to be accessible by the Files app (my vault i
 
 * Using `cmd + P` and run the `Things3 Sync: Bulk Create Things Todo`
 
-* If tasks are under the header `# Now`, this command will check to see if they are already in Things. If not, it will create a new task in Things.
+* If tasks are under the header specified in the plugin settings, this command will check to see if they are already in Things. If not, it will create a new task in Things.
 
 ### Mark Things Todo Complete
 
@@ -60,11 +60,11 @@ These shortcuts require your vault to be accessible by the Files app (my vault i
 
 ***Notes:*** If you wanna use the command conveniently, it would be better to set up a hotkeys for it.
 
-### Toggle all Tasks in # Now Header
+### Toggle all Tasks in Specified Header
 
 * Using `cmd + P` and run the `Things3 Sync: Update all Things in # Now Header`
 
-* If tasks are under the header `# Now`, they will be updated so that if the task is marked "complete" anywhere, it will be marked complete everywhere.
+* If tasks are under the header specified in the plugin settings, they will be updated so that if the task is marked "complete" anywhere, it will be marked complete everywhere.
 
 
 
