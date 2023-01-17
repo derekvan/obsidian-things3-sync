@@ -220,8 +220,8 @@ function collectTodos(){
 	const doc = view.getViewData();
 	const now = /^# Now\n((.|\n)*?)(?=\n#+)/gm
 	const block = doc.match(now)
-	const re = /(?<=^# Now\n(?:(?!\n# \w)[^])*)-[ \t]*\[[^][]*].*(?:\n[ \t]+-.*)*/gm
-	const things = doc.match(re)
+	const re = /- \[ \][\s\S]*?(?=\n\n|$|- \[(x| ))/g;
+	const things = block[0].match(re)
 	const thingTasks = things
 
 	return [thingTasks, block]
@@ -475,6 +475,7 @@ export default class Things3Plugin extends Plugin {
 					const fileName = fileTitle.path.replace(/\.md$/, "");
 					const todos = collectTodos(fileName);
 					const bulk = bulkUpdate(todos[0], todos[1], fileName)
+					console.log(bulk)
 					const stringT = urlEncode(JSON.stringify(bulk))
 
 					const url = `shortcuts://run-shortcut?name=ThingsBulkUpdate&input=text&text=${stringT}`
