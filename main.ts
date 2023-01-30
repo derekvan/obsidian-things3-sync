@@ -169,6 +169,9 @@ function extractTags(line: string, setting_tags: string){
 	const regex = /#([^\s]+)/gs
 	const array = [...line.matchAll(regex)]
 	const tag_array = array.map(x => x[1])
+	if (setting_tags.length > 0) {
+		tag_array.push(setting_tags);
+	}
 	const { metadataCache } = this.app;
 	const workspace = this.app.workspace;
 	const fileTitle = workspace.getActiveFile()
@@ -266,9 +269,9 @@ function extractTarget(line: string) {
 }
 
 function createTodo(todo: TodoInfo, deepLink: string){
-	const noter = todo.project + "\n\n" + todo.notes + "\n\n" + deepLink
+	const noter = todo.notes + "\n\n" + deepLink
 	const n = urlEncode(noter)
-	const url = `things:///add?title=${todo.title}&list=${todo.tags}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=week`;
+	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
 	window.open(url);
 }
 
@@ -396,7 +399,7 @@ export default class Things3Plugin extends Plugin {
 						if (id == null){
 							const todo = constructTodo(t,this.settings,fileName)
 							const noter = todo.project + "\n\n" + todo.notes + "\n\n" + obsidianDeepLink
-							tJson.push({"type":"to-do","attributes":{"title":todo.title, "tags":["week"],"list":todo.tags,"notes": noter}})
+							tJson.push({"type":"to-do","attributes":{"title":todo.title, "tags":[todo.tags],"list":todo.project,"notes": noter}})
 							}
 					});
 					const json = urlEncode(JSON.stringify(tJson))
