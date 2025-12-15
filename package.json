@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-things3-sync-fork",
-	"version": "3.1",
+	"version": "3.5",
 	"description": "A plugin for syncing tasks between Obsidian and Things3. Bulk adding and updating tasks based on status in Things or Obsidian",
 	"main": "main.js",
 	"scripts": {
