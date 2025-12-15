@@ -113,15 +113,24 @@ function urlEncode(line: string) {
 
 function constructTodo(line: string, settings: PluginSettings, fileName: string){
 	line = line.trim();
-	const tags = extractTags(line, settings.defaultTags);
+
+	// Extract project from first hashtag (e.g., #Computer -> "Computer" project)
+	const hashtagProject = extractProjectFromTag(line);
+	const hasHashtagProject = hashtagProject.length > 0;
+
+	// If first hashtag is used as project, skip it when extracting tags
+	const tags = extractTags(line, settings.defaultTags, hasHashtagProject);
 
 	const line2 = line.replace(/#([^\s]+)/gs, '');
+
+	// Use hashtag as project if present, otherwise fall back to front matter
+	const project = hasHashtagProject ? hashtagProject : (extractProject() || '');
 
 	const todo: TodoInfo = {
 		title: extractTitle(line2),
 		tags: tags,
 		date: extractDate(fileName),
-		project: extractProject(),
+		project: project,
 		notes: extractNotes(line)
 	}
 
@@ -154,6 +163,16 @@ function extractDate(line:string) {
 	return date;
 }
 
+// Extract the first hashtag as the Things project/list
+function extractProjectFromTag(line: string): string {
+	const regex = /#([^\s]+)/
+	const match = line.match(regex);
+	if (match) {
+		return match[1];
+	}
+	return '';
+}
+
 function extractTitle(line: string) {
 	const regex = /[^#\s\-\[\]*](.*)/gs
 	const content = line.match(regex);
@@ -165,10 +184,11 @@ function extractTitle(line: string) {
 	return title;
 }
 
-function extractTags(line: string, setting_tags: string){
+function extractTags(line: string, setting_tags: string, skipFirst: boolean = false){
 	const regex = /#([^\s]+)/gs
 	const array = [...line.matchAll(regex)]
-	const tag_array = array.map(x => x[1])
+	// Skip the first hashtag if it's being used as the project
+	const tag_array = skipFirst ? array.slice(1).map(x => x[1]) : array.map(x => x[1])
 	if (setting_tags.length > 0) {
 		tag_array.push(setting_tags);
 	}
@@ -189,7 +209,7 @@ function extractTags(line: string, setting_tags: string){
 	}
 	line = line.replace(regex, '');
 	const tags = tag_array.join(',')
-	
+
 	return tags;
 }
 
