@@ -291,7 +291,12 @@ function extractTarget(line: string) {
 function createTodo(todo: TodoInfo, deepLink: string){
 	const noter = todo.notes + "\n\n" + deepLink
 	const n = urlEncode(noter)
-	const url = `things:///add?title=${todo.title}&list=${todo.project}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${todo.tags}`;
+	const title = urlEncode(todo.title)
+	const project = urlEncode(todo.project)
+	const tags = urlEncode(todo.tags)
+	const url = `things:///add?title=${title}&list=${project}&notes=${n}&when=${todo.date}&x-success=obsidian://things-sync-id&tags=${tags}`;
+	console.log('Things URL:', url);
+	console.log('Project extracted:', todo.project);
 	window.open(url);
 }
 
